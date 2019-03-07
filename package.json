@@ -1,0 +1,45 @@
+{
+    "name": "cordova-plugin-application-updater",
+    "version": "1.0.0",
+    "description": "Cordova Application Updater",
+    "cordova": {
+      "id": "cordova-plugin-application-updater",
+      "platforms": [
+        "android",
+        "browser"
+      ]
+    },
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/wspresto/cordova-plugin-media.git"
+    },
+    "bugs": {
+      "url": "https://github.com/wspresto/cordova-plugin-media.git"
+    },
+    "keywords": [
+      "cordova",
+      "ecosystem:cordova",
+      "cordova-android"
+    ],
+    "scripts": {
+
+    },
+    "author": "Apache Software Foundation",
+    "license": "Apache-2.0",
+    "engines": {
+      "cordovaDependencies": {
+        "3.0.0": {
+          "cordova-android": ">=6.1.0"
+        },
+        "4.0.0": {
+          "cordova-android": ">=6.3.0"
+        },
+        "6.0.0": {
+          "cordova": ">100"
+        }
+      }
+    },
+    "devDependencies": {
+      "jshint": "^2.6.0"
+    }
+  }
