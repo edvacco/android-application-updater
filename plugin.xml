@@ -21,7 +21,7 @@
     <dependency  id="cordova-plugin-appversion" version="1.0.0" />
 
     <!-- js -->
-    <js-module src="www/application-updater.js" name="ApplicationUpdater">
+    <js-module src="www/ApplicationUpdater.js" name="ApplicationUpdater">
         <clobbers target="ApplicationUpdater" />
     </js-module>
 
