@@ -42,7 +42,7 @@ public class UpdateController {
         }
     };
 
-    public onUpdate(String remoteUrl) {
+    public void onUpdate(String remoteUrl) {
         this.mDownloadThread = new DownloadThread(mHandler, remoteUrl);
         this.cordova.getThreadPool().execute(this.mDownloadThread);         
     }
