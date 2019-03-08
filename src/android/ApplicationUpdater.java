@@ -27,7 +27,7 @@ import java.io.File;
 public class ApplicationUpdater extends CordovaPlugin {
 
     public final String apkFileName = "audiodio.apk";
-    private String remoteUrl;
+    private String remoteUrl = "";
     //////////
     // Permissions
     //////////
@@ -39,14 +39,20 @@ public class ApplicationUpdater extends CordovaPlugin {
     private static String[] OTHER_PERMISSIONS = { Manifest.permission.INTERNET,
             Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE };
 
-    private UpdateController mController;
+    private UpdateController mController = null;
     private CallbackContext callbackContext;
 
-    public ApplicationUpdater() {
-        String filepath = Environment.getExternalStorageDirectory()+"/updates/"+this.apkFileName;
-        this.mController = new UpdateController(cordova.getActivity(), cordova, filepath);
 
-        this.remoteUrl = "";
+
+    /**
+     * @return the mController
+     */
+    public UpdateController getController() {
+        if (this.mController == null) {
+            String filepath = Environment.getExternalStorageDirectory()+"/updates/"+this.apkFileName;
+            this.mController = new UpdateController(cordova.getActivity(), cordova, filepath);
+        }
+        return this.mController;
     }
 
     @Override
@@ -55,7 +61,7 @@ public class ApplicationUpdater extends CordovaPlugin {
         System.out.println(this.remoteUrl); // TESTING!!!
         if (action.equals("update")) {
             if (verifyInstallPermission() && verifyOtherPermissions()) {
-                this.mController.onUpdate(this.remoteUrl);
+                getController().onUpdate(this.remoteUrl);
                 //callbackContext.success(null);
                 // TODO: callback success when controller has downloaded the apk file
             }
@@ -120,7 +126,7 @@ public class ApplicationUpdater extends CordovaPlugin {
                 return;
             }
             if (verifyOtherPermissions()) {
-                this.mController.onUpdate(this.remoteUrl);
+                getController().onUpdate(this.remoteUrl);
             }
         } else if (requestCode == UNKNOWN_SOURCES_PERMISSION_REQUEST_CODE) {
             try {
@@ -132,7 +138,7 @@ public class ApplicationUpdater extends CordovaPlugin {
             } catch (Settings.SettingNotFoundException e) {
             }
             if (verifyOtherPermissions()) {
-                this.mController.onUpdate(this.remoteUrl);
+                getController().onUpdate(this.remoteUrl);
             }
         }
     }
@@ -147,7 +153,7 @@ public class ApplicationUpdater extends CordovaPlugin {
                     return;
                 }
             }
-            this.mController.onUpdate(this.remoteUrl);
+            getController().onUpdate(this.remoteUrl);
         }
     }
 }
