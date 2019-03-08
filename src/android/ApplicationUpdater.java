@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.content.pm.PackageManager;
+import android.os.Environment;
 
 import org.apache.cordova.LOG;
 import org.apache.cordova.CallbackContext;
@@ -57,12 +58,14 @@ public class ApplicationUpdater extends CordovaPlugin {
         if (action.equals("update")) {
             if (verifyInstallPermission() && verifyOtherPermissions()) {
                 this.mController.onUpdate(this.remoteUrl);
-                callbackContext.success(null);
+                //callbackContext.success(null);
                 // TODO: callback success when controller has downloaded the apk file
             }
             return true;
+        } else {
+            //callbackContext.error(UpdateController.makeJSON(Constants.NO_SUCH_METHOD, "No such method: " + action));
         }
-        callbackContext.error(UpdateController.makeJSON(Constants.NO_SUCH_METHOD, "No such method: " + action));
+
         return false;
     }
 

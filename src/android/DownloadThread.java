@@ -23,7 +23,7 @@ public class DownloadThread implements Runnable {
     public DownloadThread(Handler mHandler, String mRemoteUrl, String mApkPath) {
         this.mApkPath = mApkPath;
         
-        this.remoteUrl = remoteUrl;
+        this.mRemoteUrl = mRemoteUrl;
         this.mHandler = mHandler;
     }
 
@@ -35,7 +35,7 @@ public class DownloadThread implements Runnable {
     private void download() {
         try {
             if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                URL url = new URL(remoteUrl);
+                URL url = new URL(this.mRemoteUrl);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.connect();
                 int length = conn.getContentLength();

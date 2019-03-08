@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ProgressBar;
 import android.support.v4.content.FileProvider;
+import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.BuildHelper;
 import org.apache.cordova.LOG;
 
@@ -28,13 +29,15 @@ public class UpdateController {
     private CordovaInterface cordova;
     private String mApkPath;
     private Context mContext;
+    private DownloadThread mDownloadThread;
+        
     public UpdateController(Context mContext, CordovaInterface cordova, String mApkPath) {
         this.mApkPath = mApkPath;
         this.cordova = cordova;    
         this.mContext = mContext;
     }
 
-    private DownloadThread mDownloadThread;
+
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(android.os.Message msg) {
