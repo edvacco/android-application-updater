@@ -1,11 +1,13 @@
 package com.application.plugins.android;
 
+import android.provider.Settings;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.content.pm.PackageManager;
 
 import org.apache.cordova.LOG;
 import org.apache.cordova.CallbackContext;
@@ -13,13 +15,17 @@ import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.BuildHelper;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 
 
+
 public class ApplicationUpdater extends CordovaPlugin {
 
-    static String apkFileName = "audiodio.apk";
+    public final String apkFileName = "audiodio.apk";
     private String remoteUrl;
     //////////
     // Permissions
@@ -34,13 +40,13 @@ public class ApplicationUpdater extends CordovaPlugin {
 
     private Context mContext;
     private UpdateController mController;
-    private CordovaInterface cordova;
     private CallbackContext callbackContext;
 
     public ApplicationUpdater(Context mContext, CordovaInterface cordova) {
         this.mContext = mContext;
-        this.cordova = cordova;
-        this.mController = new UpdateController();
+        String filepath = Environment.getExternalStorageDirectory()+"/updates/"+this.apkFileName;
+        this.mController = new UpdateController(mContext, cordova, filepath);
+
         this.remoteUrl = "";
     }
 
@@ -56,7 +62,7 @@ public class ApplicationUpdater extends CordovaPlugin {
             }
             return true;
         }
-        callbackContext.error(Utils.makeJSON(Constants.NO_SUCH_METHOD, "No such method: " + action));
+        callbackContext.error(UpdateController.makeJSON(Constants.NO_SUCH_METHOD, "No such method: " + action));
         return false;
     }
 

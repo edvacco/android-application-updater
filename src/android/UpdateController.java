@@ -14,6 +14,8 @@ import android.view.View.OnClickListener;
 import android.widget.ProgressBar;
 import android.support.v4.content.FileProvider;
 import org.apache.cordova.BuildHelper;
+import org.apache.cordova.LOG;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONArray;
@@ -21,8 +23,15 @@ import org.json.JSONException;
 import java.io.File;
 
 public class UpdateController {
+    private final String TAG = "UpdateController";
 
-    public UpdateController() {
+    private CordovaInterface cordova;
+    private String mApkPath;
+    private Context mContext;
+    public UpdateController(Context mContext, CordovaInterface cordova, String mApkPath) {
+        this.mApkPath = mApkPath;
+        this.cordova = cordova;    
+        this.mContext = mContext;
     }
 
     private DownloadThread mDownloadThread;
@@ -30,15 +39,12 @@ public class UpdateController {
         @Override
         public void handleMessage(android.os.Message msg) {
             super.handleMessage(msg);
-            switch (msg.what) {
-            case DownloadThread.SUCCESS:
+            if (msg.what == DownloadThread.SUCCESS) {
                 installApk();
-                break;
-            case DownloadThread.ERROR:
-            default:
-                callbackContext.error(makeJSON(Constants.UNKNOWN_ERROR, "unknown error"));
+            } else if (msg.what == DownloadThread.ERROR) {
+                //callbackContext.error(makeJSON(Constants.UNKNOWN_ERROR, "unknown error"));
+                //TODO: callback with error?
             }
-
         }
     };
 
@@ -50,9 +56,9 @@ public class UpdateController {
     private void installApk() {
         LOG.d(TAG, "Installing APK");
 
-        File apkFile = new File(mSavePath, ApplicationUpdater.apkFileName);
+        File apkFile = new File(this.mApkPath);
         if (!apkFile.exists()) {
-            LOG.e(TAG, "Could not find APK: " + ApplicationUpdater.apkFileName);
+            LOG.e(TAG, "Could not find APK: " + this.mApkPath);
             return;
         }
 
@@ -64,17 +70,17 @@ public class UpdateController {
             Intent i = new Intent(Intent.ACTION_INSTALL_PACKAGE);
             i.setData(apkUri);
             i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            mContext.startActivity(i);
+            this.mContext.startActivity(i);
         } else {
             LOG.d(TAG, "Build SDK less than Nougat");
             Intent i = new Intent(Intent.ACTION_VIEW);
             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             i.setDataAndType(Uri.parse("file://" + apkFile.toString()), "application/vnd.android.package-archive");
-            mContext.startActivity(i);
+            this.mContext.startActivity(i);
         }
     }
 
-    public JSONObject makeJSON(int code, Object msg) {
+    public static JSONObject makeJSON(int code, Object msg) {
         JSONObject json = new JSONObject();
 
         try {

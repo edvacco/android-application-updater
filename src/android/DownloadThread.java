@@ -16,12 +16,13 @@ public class DownloadThread implements Runnable {
     static int SUCCESS = 0;
     static int ERROR = 1;
 
-    private String remoteUrl;
-    private String target;
+    private String mRemoteUrl;
+    private String mApkPath;
     private Handler mHandler;
 
-    public DownloadThread(Handler mHandler, String remoteUrl) {
-        this.target = Environment.getExternalStorageDirectory() + "/" + "updates";
+    public DownloadThread(Handler mHandler, String mRemoteUrl, String mApkPath) {
+        this.mApkPath = mApkPath;
+        
         this.remoteUrl = remoteUrl;
         this.mHandler = mHandler;
     }
@@ -39,11 +40,11 @@ public class DownloadThread implements Runnable {
                 conn.connect();
                 int length = conn.getContentLength();
                 InputStream is = conn.getInputStream();
-                File file = new File(mSavePath);
+                File file = new File(mApkPath);
                 if (!file.exists()) {
                     file.mkdir();
                 }
-                File apkFile = new File(mSavePath, ApplicationUpdater.apkFileName);
+                File apkFile = new File(mApkPath);
                 FileOutputStream fos = new FileOutputStream(apkFile);
                 byte buf[] = new byte[1024];
                 int numread = -1;
