@@ -39,14 +39,12 @@ public class ApplicationUpdater extends CordovaPlugin {
     private static String[] OTHER_PERMISSIONS = { Manifest.permission.INTERNET,
             Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE };
 
-    private Context mContext;
     private UpdateController mController;
     private CallbackContext callbackContext;
 
-    public ApplicationUpdater(Context mContext, CordovaInterface cordova) {
-        this.mContext = mContext;
+    public ApplicationUpdater() {
         String filepath = Environment.getExternalStorageDirectory()+"/updates/"+this.apkFileName;
-        this.mController = new UpdateController(mContext, cordova, filepath);
+        this.mController = new UpdateController(cordova.getActivity(), cordova, filepath);
 
         this.remoteUrl = "";
     }
