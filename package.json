@@ -11,10 +11,10 @@
     },
     "repository": {
       "type": "git",
-      "url": "https://github.com/wspresto/cordova-plugin-media.git"
+      "url": "https://github.com/wspresto/android-application-updater.git"
     },
     "bugs": {
-      "url": "https://github.com/wspresto/cordova-plugin-media.git"
+      "url": "https://github.com/wspresto/android-application-updater.git"
     },
     "keywords": [
       "cordova",
