@@ -1,5 +1,5 @@
 package com.application.plugins.android;
-
+import android.Manifest;
 import android.provider.Settings;
 import android.app.Activity;
 import android.content.Context;

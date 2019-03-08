@@ -1,6 +1,6 @@
 package com.application.plugins.android;
 
-import android.Manifest;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -31,13 +31,6 @@ public class UpdateController {
     private Context mContext;
     private DownloadThread mDownloadThread;
         
-    public UpdateController(Context mContext, CordovaInterface cordova, String mApkPath) {
-        this.mApkPath = mApkPath;
-        this.cordova = cordova;    
-        this.mContext = mContext;
-    }
-
-
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(android.os.Message msg) {
@@ -51,8 +44,17 @@ public class UpdateController {
         }
     };
 
+    public UpdateController(Context mContext, CordovaInterface cordova, String mApkPath) {
+        this.mApkPath = mApkPath;
+        this.cordova = cordova;    
+        this.mContext = mContext;
+    }
+
+
+
+
     public void onUpdate(String remoteUrl) {
-        this.mDownloadThread = new DownloadThread(mHandler, remoteUrl);
+        this.mDownloadThread = new DownloadThread(this.mHandler, remoteUrl, this.mApkPath);
         this.cordova.getThreadPool().execute(this.mDownloadThread);         
     }
 
