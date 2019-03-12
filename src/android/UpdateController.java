@@ -1,12 +1,10 @@
-package com.application.plugins.android;
-
+package com.application.wspresto.plugins;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
@@ -14,7 +12,7 @@ import android.view.View.OnClickListener;
 import android.widget.ProgressBar;
 import android.support.v4.content.FileProvider;
 import org.apache.cordova.CordovaInterface;
-import org.apache.cordova.BuildHelper;
+import org.apache.cordova.CallbackContext;
 import org.apache.cordova.LOG;
 
 import org.json.JSONException;
@@ -27,62 +25,61 @@ public class UpdateController {
     private final String TAG = "UpdateController";
 
     private CordovaInterface cordova;
-    private String mApkPath;
+
+    private String mApkDir;
+    private String mApkFile;
     private Context mContext;
     private DownloadThread mDownloadThread;
-        
+
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(android.os.Message msg) {
             super.handleMessage(msg);
+            System.out.println("Audiodio: Got message"); // TESTING!!!
+            System.out.println("Audiodio: " + msg.what); // TESTING!!!
             if (msg.what == DownloadThread.SUCCESS) {
-                installApk();
+                System.out.println("Audiodio: signalling success"); // TESTING!!!
+                CallbackContext mCallBackContext = (CallbackContext) msg.obj;
+                mCallBackContext.success();
             } else if (msg.what == DownloadThread.ERROR) {
-                //callbackContext.error(makeJSON(Constants.UNKNOWN_ERROR, "unknown error"));
-                //TODO: callback with error?
+                CallbackContext mCallBackContext = (CallbackContext) msg.obj;                
+                mCallBackContext.error("Could not download apk file.");
             }
         }
     };
 
-    public UpdateController(Context mContext, CordovaInterface cordova, String mApkPath) {
-        this.mApkPath = mApkPath;
-        this.cordova = cordova;    
+    public UpdateController(Context mContext, CordovaInterface cordova, String mApkDir, String mApkFile) {
+        this.mApkDir = mApkDir;
+        this.mApkFile = mApkFile;
+        this.cordova = cordova;
         this.mContext = mContext;
     }
 
+    public void onUpdate() {
+        this.installApk();
+    }
 
-
-
-    public void onUpdate(String remoteUrl) {
-        this.mDownloadThread = new DownloadThread(this.mHandler, remoteUrl, this.mApkPath);
-        this.cordova.getThreadPool().execute(this.mDownloadThread);         
+    public void onDownload(String remoteUrl, CallbackContext mCallBackContext) {
+        this.mDownloadThread = new DownloadThread(this.mHandler, mCallBackContext, remoteUrl, this.mApkDir, this.mApkFile);
+        this.cordova.getThreadPool().execute(this.mDownloadThread);
     }
 
     private void installApk() {
         LOG.d(TAG, "Installing APK");
 
-        File apkFile = new File(this.mApkPath);
+        File apkFile = new File(this.mApkDir, this.mApkFile);
         if (!apkFile.exists()) {
-            LOG.e(TAG, "Could not find APK: " + this.mApkPath);
+            LOG.e(TAG, "Could not find APK: " + apkFile.toString());
             return;
         }
-
+        // com.vaenow.appupdate.android.provider
         LOG.d(TAG, "APK Filename: " + apkFile.toString());
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            LOG.d(TAG, "Build SDK Greater than or equal to Nougat");
-            String applicationId = (String) BuildHelper.getBuildConfigValue((Activity) mContext, "APPLICATION_ID");
-            Uri apkUri = FileProvider.getUriForFile(mContext, applicationId + ".appupdate.provider", apkFile);
-            Intent i = new Intent(Intent.ACTION_INSTALL_PACKAGE);
-            i.setData(apkUri);
-            i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            this.mContext.startActivity(i);
-        } else {
-            LOG.d(TAG, "Build SDK less than Nougat");
-            Intent i = new Intent(Intent.ACTION_VIEW);
-            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            i.setDataAndType(Uri.parse("file://" + apkFile.toString()), "application/vnd.android.package-archive");
-            this.mContext.startActivity(i);
-        }
+        Uri apkUri = FileProvider.getUriForFile(mContext, "com.application.wspresto.plugins.provider", apkFile);
+        Intent i = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+        i.setData(apkUri);
+        i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        this.mContext.startActivity(i);
+
     }
 
     public static JSONObject makeJSON(int code, Object msg) {

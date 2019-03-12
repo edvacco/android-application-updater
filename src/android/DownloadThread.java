@@ -1,7 +1,8 @@
-package com.application.plugins.android;
+package com.application.wspresto.plugins;
 
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Message;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,14 +18,17 @@ public class DownloadThread implements Runnable {
     static int ERROR = 1;
 
     private String mRemoteUrl;
-    private String mApkPath;
+    private String mApkDir;
+    private String mApkFile;
     private Handler mHandler;
+    private Object mHandlerPayload;
 
-    public DownloadThread(Handler mHandler, String mRemoteUrl, String mApkPath) {
-        this.mApkPath = mApkPath;
-        
+    public DownloadThread(Handler mHandler, Object mHandlerPayload, String mRemoteUrl, String mApkDir, String mApkFile) {
+        this.mApkDir = mApkDir;
+        this.mApkFile = mApkFile;
         this.mRemoteUrl = mRemoteUrl;
         this.mHandler = mHandler;
+        this.mHandlerPayload = mHandlerPayload;
     }
 
     @Override
@@ -40,28 +44,45 @@ public class DownloadThread implements Runnable {
                 conn.connect();
                 int length = conn.getContentLength();
                 InputStream is = conn.getInputStream();
-                File file = new File(mApkPath);
-                if (!file.exists()) {
-                    file.mkdir();
+                File dir = new File(mApkDir);
+                if (!dir.exists()) {
+                    dir.mkdir();
                 }
-                File apkFile = new File(mApkPath);
-                FileOutputStream fos = new FileOutputStream(apkFile);
+
+                File file = new File(mApkDir, mApkFile);
+                // if (file.exists()) {
+                //     file.delete();
+                // }
+                FileOutputStream fos = new FileOutputStream(file);
                 byte buf[] = new byte[1024];
-                int numread = -1;
-                while (numread != 0) {
+                int numread = 1;
+                while (numread > 0) {                    
                     numread = is.read(buf);
-                    fos.write(buf, 0, numread);
+                    if (numread > 0) {
+                        fos.write(buf, 0, numread);
+                    }
                 }
-                mHandler.sendEmptyMessage(DownloadThread.SUCCESS);
+                fos.flush();
                 fos.close();
                 is.close();
+                System.out.println("Audiodio: " + file.getAbsolutePath()); // TESTING!!!
+                Message done = new Message();
+                done.what = DownloadThread.SUCCESS;
+                done.obj = this.mHandlerPayload;
+                mHandler.sendMessage(done);
             }
         } catch (MalformedURLException e) {
             e.printStackTrace();
-            mHandler.sendEmptyMessage(DownloadThread.ERROR);
+            Message error = new Message();
+            error.what = DownloadThread.ERROR;
+            error.obj = this.mHandlerPayload;            
+            mHandler.sendMessage(error);
         } catch (IOException e) {
             e.printStackTrace();
-            mHandler.sendEmptyMessage(DownloadThread.ERROR);
+            Message error = new Message();
+            error.what = DownloadThread.ERROR;
+            error.obj = this.mHandlerPayload;            
+            mHandler.sendMessage(error);
         }
     }
 }

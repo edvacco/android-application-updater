@@ -1,4 +1,5 @@
-package com.application.plugins.android;
+package com.application.wspresto.plugins;
+
 import android.Manifest;
 import android.provider.Settings;
 import android.app.Activity;
@@ -10,24 +11,20 @@ import android.os.Build;
 import android.content.pm.PackageManager;
 import android.os.Environment;
 
+import java.io.File;
+
 import org.apache.cordova.LOG;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
-import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.BuildHelper;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-
-
-
 public class ApplicationUpdater extends CordovaPlugin {
 
     public final String apkFileName = "audiodio.apk";
-    private String remoteUrl = "";
     //////////
     // Permissions
     //////////
@@ -40,36 +37,31 @@ public class ApplicationUpdater extends CordovaPlugin {
             Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE };
 
     private UpdateController mController = null;
-    private CallbackContext callbackContext;
-
-
 
     /**
      * @return the mController
      */
     public UpdateController getController() {
         if (this.mController == null) {
-            String filepath = Environment.getExternalStorageDirectory()+"/updates/"+this.apkFileName;
-            this.mController = new UpdateController(cordova.getActivity(), cordova, filepath);
+            String dir = new File(Environment.getExternalStorageDirectory().toString(), "updates").toString();
+            this.mController = new UpdateController(cordova.getActivity(), cordova, dir, apkFileName);
         }
         return this.mController;
     }
 
     @Override
-    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-        this.remoteUrl = args.getString(0);
-        System.out.println(this.remoteUrl); // TESTING!!!
-        if (action.equals("update")) {
+    public boolean execute(String cmd, JSONArray args, CallbackContext callbackContext) throws JSONException {
+        if (cmd.equals("check")) {            
+            String remoteUrl = args.getString(0);        
+            getController().onDownload(remoteUrl, callbackContext);
+            // TODO: callback success when controller has downloaded the apk file
+            return true;
+        } else if (cmd.equals("install")) {
             if (verifyInstallPermission() && verifyOtherPermissions()) {
-                getController().onUpdate(this.remoteUrl);
-                //callbackContext.success(null);
-                // TODO: callback success when controller has downloaded the apk file
+                getController().onUpdate();
             }
             return true;
-        } else {
-            //callbackContext.error(UpdateController.makeJSON(Constants.NO_SUCH_METHOD, "No such method: " + action));
         }
-
         return false;
     }
 
@@ -126,7 +118,7 @@ public class ApplicationUpdater extends CordovaPlugin {
                 return;
             }
             if (verifyOtherPermissions()) {
-                getController().onUpdate(this.remoteUrl);
+                getController().onUpdate();
             }
         } else if (requestCode == UNKNOWN_SOURCES_PERMISSION_REQUEST_CODE) {
             try {
@@ -138,7 +130,7 @@ public class ApplicationUpdater extends CordovaPlugin {
             } catch (Settings.SettingNotFoundException e) {
             }
             if (verifyOtherPermissions()) {
-                getController().onUpdate(this.remoteUrl);
+                getController().onUpdate();
             }
         }
     }
@@ -153,7 +145,7 @@ public class ApplicationUpdater extends CordovaPlugin {
                     return;
                 }
             }
-            getController().onUpdate(this.remoteUrl);
+            getController().onUpdate();
         }
     }
 }
